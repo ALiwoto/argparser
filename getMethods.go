@@ -302,7 +302,7 @@ func (e *EventArgs) GetAsStringTOrRaw(name ...string) string {
 	return tmp
 }
 
-// GetAsString will give you the integer value of the flag
+// GetAsInteger will give you the integer value of the flag
 // with the specified name.
 // if there is no flag with this name, or there is an
 // error on our path, it will return you zero and false.
@@ -315,7 +315,7 @@ func (e *EventArgs) GetAsInteger(name ...string) (vI int64, ok bool) {
 	return f.GetAsInteger()
 }
 
-// GetAsString will give you the boolean value of the flag
+// GetAsBool will give you the boolean value of the flag
 // with the specified name.
 // if there is no flag with this name, or there is an
 // error on our path, it will return you false.

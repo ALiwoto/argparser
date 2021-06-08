@@ -5,6 +5,9 @@
 
 package interfaces
 
+// QString is a rich interface for doing string operations.
+// it has usefull and (of course) safe method to do special
+// operations on a string value.
 type QString interface {
 	Length() int
 	IsEmpty() bool

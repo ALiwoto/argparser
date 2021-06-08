@@ -7,6 +7,7 @@ package argparser
 
 type FlagType uint8
 
+// falg types used in argparser library
 const (
 	NoneFlagType   FlagType = iota
 	BoolFlagType   FlagType = iota + 1
@@ -21,6 +22,12 @@ const (
 	Int64FlagType  FlagType = iota + 10
 )
 
+// flag type string values used in argparser library.
+// Notice that you don't have to use them in order
+// to determine the type, in fact they are for internal
+// usages, but also publiced just-in-case that if a user
+// wanted to compare them (or print them out), it won't
+// be impossible.
 const (
 	NoneTypeStr   = "None"
 	BoolTypeStr   = "bool"

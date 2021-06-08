@@ -25,6 +25,9 @@ type Flag struct {
 	fType FlagType
 }
 
+// EventArgs is our top-level struct.
+// I'm planing to make an interface for it
+// in future.
 type EventArgs struct {
 	command string // command without '/' or '!'
 	flags   []Flag
@@ -32,6 +35,7 @@ type EventArgs struct {
 }
 
 // ParseArg will parse the whole text into an EventArg and will return it.
+// It will return error if there is any, otherwise error will be nil.
 func ParseArg(text string) (e *EventArgs, err error) {
 	if ws.IsEmpty(&text) {
 		return nil, errors.New("text cannot be empty")
@@ -130,10 +134,12 @@ func ParseArg(text string) (e *EventArgs, err error) {
 		}
 		tmpFlag.setRealValue(tmp)
 
+		// appened the current flag to our flags array/
 		myFlags = append(myFlags, tmpFlag)
-
 	}
 
+	// set the whole flag arrays into our EventArgs.
+	// Please notice that this method should be private.
 	e.setFlags(myFlags)
 
 	return e, nil
@@ -141,7 +147,7 @@ func ParseArg(text string) (e *EventArgs, err error) {
 
 // look raw will look for raw data.
 // please use this function when and only when
-// no flags are provided for our commands.
+// no flags are provided for our command.
 func lookRaw(text *string, e *EventArgs) {
 	owoStr := strings.SplitN(*text, e.command, wv.BaseTwoIndex)
 	if len(owoStr) < wv.BaseTwoIndex {

@@ -5,6 +5,8 @@
 
 package wotoStrings
 
+// contant variables for wotoStrings.
+// do not edit if you don't know what is the usage.
 const (
 	sepStr = "を\u200dとsepaらーーtoーラルわSアニメキャラ髪のこ\u200dにわああああーーーーへへへ、黒空を見たnだ\u200dううう"
 )
