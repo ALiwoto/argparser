@@ -1,5 +1,5 @@
-// argparser Project
-// Copyright (C) 2021 wotoTeam, ALiwoto
+// Bot.go Project
+// Copyright (C) 2021 Sayan Biswas, ALiwoto
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of the source code.
 
@@ -9,18 +9,17 @@ import (
 	"strconv"
 	"strings"
 
-	tf "github.com/ALiwoto/argparser/interfaces"
-	wv "github.com/ALiwoto/argparser/wotoValues"
+	ws "github.com/ALiwoto/StrongStringGo/strongStringGo"
 )
 
 //---------------------------------------------------------
 
 func (f *Flag) setName(name string) {
-	name = strings.Trim(name, wv.SPACE_VALUE)
+	name = strings.Trim(name, ws.SPACE_VALUE)
 	f.name = name
 }
 
-func (f *Flag) setNameQ(q tf.QString) {
+func (f *Flag) setNameQ(q ws.QString) {
 	f.setName(q.GetValue())
 }
 
@@ -30,23 +29,23 @@ func (f *Flag) setNilValue() {
 }
 
 func (f *Flag) setRealValue(value string) {
-	myI, err := strconv.ParseInt(value, wv.BaseTen, wv.Base64Bit)
+	myI, err := strconv.ParseInt(value, ws.BaseTen, ws.Base64Bit)
 	if err == nil {
 		f.setAsInt(&myI)
 		return
 	}
 
-	tmp := strings.Trim(value, wv.SPACE_VALUE)
-	if len(tmp) == wv.BaseIndex {
+	tmp := strings.Trim(value, ws.SPACE_VALUE)
+	if len(tmp) == ws.BaseIndex {
 		f.setAsBool(true)
 		return
 	}
 
-	if tmp[wv.BaseIndex] == wv.CHAR_STR {
-		myInt := len(tmp) - wv.BaseOneIndex
-		if tmp[myInt] == wv.CHAR_STR {
-			tmp = strings.TrimPrefix(tmp, wv.STR_SIGN)
-			tmp = strings.TrimSuffix(tmp, wv.STR_SIGN)
+	if tmp[ws.BaseIndex] == ws.CHAR_STR {
+		myInt := len(tmp) - ws.BaseOneIndex
+		if tmp[myInt] == ws.CHAR_STR {
+			tmp = strings.TrimPrefix(tmp, ws.STR_SIGN)
+			tmp = strings.TrimSuffix(tmp, ws.STR_SIGN)
 			f.setAsString(&tmp)
 			return
 		}

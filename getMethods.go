@@ -1,5 +1,5 @@
-// argparser Project
-// Copyright (C) 2021 wotoTeam, ALiwoto
+// Bot.go Project
+// Copyright (C) 2021 Sayan Biswas, ALiwoto
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of the source code.
 
@@ -9,8 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ALiwoto/argparser/wotoStrings"
-	wv "github.com/ALiwoto/argparser/wotoValues"
+	ws "github.com/ALiwoto/StrongStringGo/strongStringGo"
 )
 
 //---------------------------------------------------------
@@ -21,24 +20,32 @@ func (f *Flag) GetValue() interface{} {
 	return f.value
 }
 
-// GetType will return the type of the value of this
-// flag. please notice that if you don't enter
-// any value for this flag, it will be considered as
-// `true` (which is type bool).
+// GetType will return you the type of
+// the value this flag. it's an enum.
 func (f *Flag) GetType() FlagType {
 	return f.fType
 }
 
-// GetIndex will return the index of this flag.
+// GetIndex will return you the index of this flag.
+// index of a flag is a unique int.
+// even if the name of two flags are the same, their
+// index will not be the same.
 func (f *Flag) GetIndex() int {
 	return f.index
 }
 
 // GetName will give you the name of this flag.
+// it's not unique actually.
+// for example:
+//   `/command --test "hello" --test = "HI!"
 func (f *Flag) GetName() string {
 	return f.name
 }
 
+// GetValueAndType returns both value and type of this
+// flag. originally it has internal usage, but maybe
+// you want to use it in your own package, so I made it
+// public!
 func (f *Flag) GetValueAndType() (interface{}, FlagType) {
 	return f.GetValue(), f.GetType()
 }
@@ -77,30 +84,25 @@ func (f *Flag) GetAsString() string {
 			return NoneTypeStr
 		}
 
-		return strconv.FormatInt(vI, wv.BaseTen)
+		return strconv.FormatInt(vI, ws.BaseTen)
 	}
 
 	return NoneTypeStr
 }
 
-// GetAsInteger will give the value of this flag as an
-// int64 value.
-// please notice that if it fails to convert the value
-// to int64, it will return you zero and the second
-// return value will be false.
 func (f *Flag) GetAsInteger() (vI int64, ok bool) {
 	v, t := f.GetValueAndType()
 	if t == StringFlagType {
 		vS, ok := v.(string)
 		if !ok {
-			return wv.BaseIndex, false
+			return ws.BaseIndex, false
 		}
 
-		vS = strings.ReplaceAll(vS, wv.SPACE_VALUE, wv.EMPTY)
-		vS = strings.ReplaceAll(vS, wv.STR_SIGN, wv.EMPTY)
-		vI, err := strconv.ParseInt(vS, wv.BaseTen, wv.Base64Bit)
+		vS = strings.ReplaceAll(vS, ws.SPACE_VALUE, ws.EMPTY)
+		vS = strings.ReplaceAll(vS, ws.STR_SIGN, ws.EMPTY)
+		vI, err := strconv.ParseInt(vS, ws.BaseTen, ws.Base64Bit)
 		if err != nil {
-			return wv.BaseIndex, false
+			return ws.BaseIndex, false
 		}
 
 		return vI, true
@@ -109,26 +111,26 @@ func (f *Flag) GetAsInteger() (vI int64, ok bool) {
 	if t == BoolFlagType {
 		vB, ok := v.(bool)
 		if !ok {
-			return wv.BaseIndex, false
+			return ws.BaseIndex, false
 		}
 
 		if vB {
-			return wv.BaseOneIndex, true
+			return ws.BaseOneIndex, true
 		} else {
-			return wv.BaseIndex, true
+			return ws.BaseIndex, true
 		}
 	}
 
 	if t.IsInteger() {
 		vI, ok := v.(int64)
 		if !ok {
-			return wv.BaseIndex, false
+			return ws.BaseIndex, false
 		}
 
 		return vI, true
 	}
 
-	return wv.BaseIndex, false
+	return ws.BaseIndex, false
 }
 
 func (f *Flag) GetAsBool() bool {
@@ -139,8 +141,8 @@ func (f *Flag) GetAsBool() bool {
 			return false
 		}
 
-		vS = strings.ReplaceAll(vS, wv.SPACE_VALUE, wv.EMPTY)
-		vS = strings.ReplaceAll(vS, wv.STR_SIGN, wv.EMPTY)
+		vS = strings.ReplaceAll(vS, ws.SPACE_VALUE, ws.EMPTY)
+		vS = strings.ReplaceAll(vS, ws.STR_SIGN, ws.EMPTY)
 		vB, ok := ToBoolType(vS)
 		if !ok {
 			return false
@@ -164,7 +166,7 @@ func (f *Flag) GetAsBool() bool {
 			return false
 		}
 
-		return vI != wv.BaseIndex
+		return vI != ws.BaseIndex
 	}
 
 	return false
@@ -175,19 +177,29 @@ func (e *EventArgs) GetCommand() string {
 	return e.command
 }
 
+// CompareCommand will compare the command of this event arg
+// with the given command. This function is case sensitive,
+// if you want to compare it case insensitive, then use
+// CheckCommand method.
+func (e *EventArgs) CompareCommand(cmd string) bool {
+	cmd = strings.TrimLeft(cmd, ws.GET_SLASH)
+	return e.command == cmd
+}
+
+// CheckCommand will compare the command of this event arg
+// with the given command. This function is case insensitive,
+// if you want to compare it case sensitive, then use
+// CompareCommand method.
+func (e *EventArgs) CheckCommand(cmd string) bool {
+	cmd = strings.TrimLeft(cmd, ws.GET_SLASH)
+	return strings.EqualFold(e.command, cmd)
+}
+
 func (e *EventArgs) GetFlags() []Flag {
 	return e.flags
 }
 
-// HasFlag will check if this EventArgs has at least
-// one the provided flags or not.
-// please notice that if you want to check if it has
-// ALL of the flags, use `HasFlags` method.
 func (e *EventArgs) HasFlag(names ...string) bool {
-	if names == nil {
-		return false
-	}
-
 	for _, current := range e.flags {
 		for _, name := range names {
 			if strings.EqualFold(current.name, name) {
@@ -199,10 +211,6 @@ func (e *EventArgs) HasFlag(names ...string) bool {
 	return false
 }
 
-// HasFlag will check if this EventArgs has
-// ALL of the provided flags or not.
-// please notice that if you want to check if it has
-// at least one of the flags, use `HasFlag` method.
 func (e *EventArgs) HasFlags(names ...string) bool {
 	for _, current := range e.flags {
 		for _, name := range names {
@@ -215,8 +223,12 @@ func (e *EventArgs) HasFlags(names ...string) bool {
 	return true
 }
 
+func (e *EventArgs) HasRawData() bool {
+	return !ws.IsEmpty(&e.rawData)
+}
+
 func (e *EventArgs) GetIndexFlag(index int) *Flag {
-	if index < wv.BaseIndex || index >= e.GetLength() {
+	if index < ws.BaseIndex || index >= e.GetLength() {
 		return nil
 	}
 
@@ -240,11 +252,11 @@ func (e *EventArgs) GetLength() int {
 }
 
 func (e *EventArgs) IsEmpty() bool {
-	return len(e.flags) == wv.BaseIndex
+	return len(e.flags) == ws.BaseIndex
 }
 
 func (e *EventArgs) IsEmptyOrRaw() bool {
-	return e.IsEmpty() && len(e.rawData) == wv.BaseIndex
+	return e.IsEmpty() && len(e.rawData) == ws.BaseIndex
 }
 
 // GetAsString will give you the string value of the flag
@@ -254,7 +266,7 @@ func (e *EventArgs) IsEmptyOrRaw() bool {
 func (e *EventArgs) GetAsString(name ...string) string {
 	f := e.GetFlag(name...)
 	if f == nil {
-		return wv.EMPTY
+		return ws.EMPTY
 	}
 
 	return f.GetAsString()
@@ -268,54 +280,45 @@ func (e *EventArgs) GetAsString(name ...string) string {
 func (e *EventArgs) GetAsStringOrRaw(name ...string) string {
 	tmp := e.GetAsString(name...)
 
-	if wotoStrings.IsEmpty(&tmp) {
+	if ws.IsEmpty(&tmp) {
 		return e.rawData
 	}
 
 	return tmp
 }
 
-// GetAsStringT's functionality is exactly like
-// GetAsString, but it will also trim the spaces,
-// so you can use a pure string.
-// please consider that using this method is
-// somehow dangerous and the usage is for places
-// like toLang in wotoTranslation package.
-func (e *EventArgs) GetAsStringT(name ...string) string {
-	s := e.GetAsString(name...)
-	return strings.TrimSpace(s)
-}
-
-// GetAsStringTOrRaw's functionality is exactly like
-// GetAsString, but it will also trim the spaces,
-// so you can use a pure string.
-// please consider that using this method is
-// somehow dangerous and the usage is for places
-// like toLang in wotoTranslation package.
-// if the value is empty, it will return the raw data.
-func (e *EventArgs) GetAsStringTOrRaw(name ...string) string {
-	tmp := e.GetAsStringT(name...)
-	if wotoStrings.IsEmpty(&tmp) {
-		return e.rawData
-	}
-
-	return tmp
-}
-
-// GetAsInteger will give you the integer value of the flag
+// GetAsString will give you the integer value of the flag
 // with the specified name.
 // if there is no flag with this name, or there is an
 // error on our path, it will return you zero and false.
 func (e *EventArgs) GetAsInteger(name ...string) (vI int64, ok bool) {
 	f := e.GetFlag(name...)
 	if f == nil {
-		return wv.BaseIndex, false
+		return ws.BaseIndex, false
 	}
 
 	return f.GetAsInteger()
 }
 
-// GetAsBool will give you the boolean value of the flag
+// GetAsString will give you the integer value of the flag
+// with the specified name.
+// if there is no flag with this name, or there is an
+// error on our path, it will return you zero and false.
+func (e *EventArgs) GetAsIntegerOrRaw(name ...string) (vI int64, ok bool) {
+	if e.IsEmpty() || name == nil {
+		str := e.GetAsStringOrRaw()
+		vI, err := strconv.ParseInt(str, ws.BaseTen, ws.Base64Bit)
+		if err != nil {
+			return ws.BaseIndex, false
+		}
+
+		return vI, true
+	} else {
+		return e.GetAsInteger(name...)
+	}
+}
+
+// GetAsString will give you the boolean value of the flag
 // with the specified name.
 // if there is no flag with this name, or there is an
 // error on our path, it will return you false.
@@ -331,7 +334,7 @@ func (e *EventArgs) GetAsBool(name ...string) bool {
 //---------------------------------------------------------
 
 func ToBoolType(value string) (v, isBool bool) {
-	value = strings.Trim(value, wv.SPACE_VALUE)
+	value = strings.TrimSpace(value)
 	value = strings.ToLower(value)
 	switch value {
 	case TrueHlc, YesHlc, OnHlc:
@@ -385,6 +388,10 @@ func (t *FlagType) IsInteger() bool {
 		*t == UInt16FlagType ||
 		*t == UInt32FlagType ||
 		*t == UInt64FlagType
+}
+
+func (t *FlagType) IsString() bool {
+	return *t == StringFlagType
 }
 
 //---------------------------------------------------------
