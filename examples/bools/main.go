@@ -8,7 +8,7 @@ package main
 import (
 	"log"
 
-	"github.com/ALiwoto/argparser"
+	"github.com/ALiwoto/argparser/argparser"
 )
 
 const boolTest = "/test --flag1 true --flag2 on" +
@@ -17,7 +17,7 @@ const boolTest = "/test --flag1 true --flag2 on" +
 	" --flag5 off"
 
 func main() {
-	args, err := argparser.ParseArg(boolTest)
+	args, err := argparser.ParseArgDefault(boolTest)
 	if err != nil {
 		log.Fatal(err)
 	}

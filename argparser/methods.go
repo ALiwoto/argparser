@@ -1,4 +1,4 @@
-// Bot.go Project
+// argparser Project
 // Copyright (C) 2021 Sayan Biswas, ALiwoto
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of the source code.
@@ -13,6 +13,72 @@ import (
 )
 
 //---------------------------------------------------------
+
+func (f *Flag) setName(name string) {
+	name = strings.TrimSpace(name)
+	f.name = name
+}
+
+func (f *Flag) setNameQ(q ws.QString) {
+	f.setName(q.GetValue())
+}
+
+func (f *Flag) setNilValue() {
+	f.value = nil
+	f.fType = NoneFlagType
+}
+
+func (f *Flag) setRealValue(value string) {
+	tmp := strings.TrimSpace(value)
+	if len(tmp) == ws.BaseIndex {
+		f.setAsBool(true)
+		f.setAsEmpty()
+		return
+	}
+
+	myI, err := strconv.ParseInt(value, ws.BaseTen, ws.Base64Bit)
+	if err == nil {
+		f.setAsInt(&myI)
+		return
+	}
+
+	if tmp[ws.BaseIndex] == ws.CHAR_STR {
+		myInt := len(tmp) - ws.BaseOneIndex
+		if tmp[myInt] == ws.CHAR_STR {
+			tmp = strings.TrimPrefix(tmp, ws.STR_SIGN)
+			tmp = strings.TrimSuffix(tmp, ws.STR_SIGN)
+			f.setAsString(&tmp)
+			return
+		}
+	}
+
+	v, isBool := ToBoolType(value)
+	if isBool {
+		f.setAsBool(v)
+		return
+	}
+
+	f.setAsString(&value)
+}
+
+func (f *Flag) setAsBool(value bool) {
+	f.value = value
+	f.fType = BoolFlagType
+}
+
+func (f *Flag) setAsEmpty() {
+	f.emptyT = true
+}
+
+func (f *Flag) setAsString(value *string) {
+	f.value = *value
+	f.fType = StringFlagType
+}
+
+func (f *Flag) setAsInt(value *int64) {
+	f.value = *value
+	f.fType = Int64FlagType
+}
 
 // GetValue will return you the value of this flag.
 // remember that value can be
@@ -88,6 +154,10 @@ func (f *Flag) GetAsString() string {
 	}
 
 	return NoneTypeStr
+}
+
+func (f *Flag) isEmpty() bool {
+	return f.emptyT || f.fType == NoneFlagType
 }
 
 func (f *Flag) GetAsInteger() (vI int64, ok bool) {
@@ -318,6 +388,17 @@ func (e *EventArgs) GetAsIntegerOrRaw(name ...string) (vI int64, ok bool) {
 	}
 }
 
+func (e *EventArgs) GetFirstNoneEmptyValue() string {
+	for _, current := range e.flags {
+		if !current.isEmpty() {
+			return current.GetAsString()
+		}
+	}
+
+	// lets return raw data here; as it is the last resort.
+	return e.rawData
+}
+
 // GetAsString will give you the boolean value of the flag
 // with the specified name.
 // if there is no flag with this name, or there is an
@@ -331,20 +412,11 @@ func (e *EventArgs) GetAsBool(name ...string) bool {
 	return f.GetAsBool()
 }
 
-//---------------------------------------------------------
-
-func ToBoolType(value string) (v, isBool bool) {
-	value = strings.TrimSpace(value)
-	value = strings.ToLower(value)
-	switch value {
-	case TrueHlc, YesHlc, OnHlc:
-		return true, true
-	case FalseHlc, NoHlc, OffHlc:
-		return false, true
-	default:
-		return false, false
-	}
+func (e *EventArgs) setFlags(f []Flag) {
+	e.flags = f
 }
+
+//---------------------------------------------------------
 
 func (t *FlagType) ToString() string {
 	switch *t {

@@ -13,30 +13,35 @@ import (
 )
 
 // Flag is the options passed along with the commands
-// by users. they should send them with prefex "--",
+// by users. they should send them with prefix "--",
 // but we will remove them in the pTools.
 type Flag struct {
-	name  string
-	index int
-	value interface{}
-	fType FlagType
+	name   string
+	index  int
+	value  interface{}
+	fType  FlagType
+	emptyT bool
 }
 
 type EventArgs struct {
-	command string // command without '/' or '!'
-	flags   []Flag
-	rawData string
+	prefixes []rune
+	command  string // command without '/' or '!'
+	flags    []Flag
+	rawData  string
 }
 
 // ParseArg will parse the whole text into an EventArg and will return it.
-func ParseArg(text string) (e *EventArgs, err error) {
-	if ws.IsEmpty(&text) {
+func ParseArg(text string, prefixes []rune) (e *EventArgs, err error) {
+	if text == "" {
 		return nil, errors.New("text cannot be empty")
 	}
 
+	if len(prefixes) == 0 {
+		prefixes = DefaultPrefixes
+	}
+
 	ss := ws.Ss(text)
-	if !ss.HasPrefix(ws.COMMAND_PREFIX1, ws.COMMAND_PREFIX2,
-		ws.SUDO_PREFIX1) {
+	if !ss.HasRunePrefix(prefixes...) {
 		return nil, errors.New("this message is not a command at all")
 	}
 
@@ -50,8 +55,7 @@ func ParseArg(text string) (e *EventArgs, err error) {
 		return nil, errors.New("length of the command cannot be zero")
 	}
 
-	cmdSs := cmd.TrimStr(ws.COMMAND_PREFIX1, ws.COMMAND_PREFIX2,
-		ws.SUDO_PREFIX1, ws.SPACE_VALUE)
+	cmdSs := cmd.TrimStr(toStrArray(prefixes)...)
 	if cmdSs.IsEmpty() {
 		return nil, errors.New("command cannot be only whitespace")
 	}
@@ -59,7 +63,8 @@ func ParseArg(text string) (e *EventArgs, err error) {
 	cmdStr := cmdSs.GetValue()
 
 	e = &EventArgs{
-		command: cmdStr,
+		command:  cmdStr,
+		prefixes: prefixes,
 	}
 
 	// lock the special characters such as "--", ":", "=".
@@ -130,12 +135,24 @@ func ParseArg(text string) (e *EventArgs, err error) {
 		tmpFlag.setRealValue(fixTmpStr(tmp))
 
 		myFlags = append(myFlags, tmpFlag)
-
 	}
 
 	e.setFlags(myFlags)
 
 	return e, nil
+}
+
+func ParseArgDefault(text string) (e *EventArgs, err error) {
+	return ParseArg(text, DefaultPrefixes)
+}
+
+func toStrArray(r []rune) []string {
+	var s []string
+	for _, v := range r {
+		s = append(s, string(v))
+	}
+	s = append(s, ws.SPACE_VALUE)
+	return s
 }
 
 func fixTmpStr(tmp string) string {
@@ -161,4 +178,17 @@ func lookRaw(text *string, e *EventArgs) {
 	tmp = strings.TrimSpace(tmp)
 
 	e.rawData = tmp
+}
+
+func ToBoolType(value string) (v, isBool bool) {
+	value = strings.TrimSpace(value)
+	value = strings.ToLower(value)
+	switch value {
+	case TrueHlc, YesHlc, OnHlc:
+		return true, true
+	case FalseHlc, NoHlc, OffHlc:
+		return false, true
+	default:
+		return false, false
+	}
 }

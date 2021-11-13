@@ -1,11 +1,9 @@
-// Bot.go Project
-// Copyright (C) 2021 Sayan Biswas, ALiwoto
+// argparser Project
+// Copyright (C) 2021 wotoTeam, ALiwoto
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of the source code.
 
 package argparser
-
-type FlagType uint8
 
 const (
 	NoneFlagType FlagType = iota
@@ -33,4 +31,14 @@ const (
 	Int16TypeStr  = "int16"
 	Int32TypeStr  = "int32"
 	Int64TypeStr  = "int64"
+)
+
+// common and global HLCs.
+const (
+	TrueHlc  = "true"
+	YesHlc   = "yes"
+	OnHlc    = "on"
+	FalseHlc = "false"
+	NoHlc    = "no"
+	OffHlc   = "off"
 )
