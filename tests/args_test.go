@@ -17,6 +17,10 @@ and raiding."`
 	cmd5 = `/command5 --o --f I like this --action gban --trigger:I hate you --reason = 
 "trolling, spamming, using unsuitable words for the group
 and raiding." --h = true`
+
+	cmd6 = `/command6 no longer exists --o --f I like this --action gban --trigger:I hate you --reason = 
+"trolling, spamming, using unsuitable words for the group
+and raiding." --h = true`
 )
 
 func TestArgs1(t *testing.T) {
@@ -177,7 +181,57 @@ func TestArgs5(t *testing.T) {
 	}
 
 	if arg.GetLength() != 6 {
-		t.Error("arg length is not 5")
+		t.Error("arg length is not 6")
+		return
+	}
+
+	if arg.HasRawData() {
+		t.Error("arg has raw data")
+		return
+	}
+
+	act := arg.GetAsStringOrRaw("action")
+	if act != "gban" {
+		t.Error("action is not gban")
+		return
+	}
+
+	if arg.GetAsString("keyword", "word", "trigger") != "I hate you" {
+		t.Error("keyword is not \"I hate you\"")
+		return
+	}
+
+	if arg.GetFirstNoneEmptyValue() != "I like this" {
+		t.Error("first none empty value is incorrect")
+		return
+	}
+
+	reason := arg.GetAsString("reason")
+	log.Println("we will", act,
+		"users if they use \""+
+			arg.GetAsString("keyword", "word", "trigger")+
+			"\" in the group.", "the reason will be: \""+reason+"\"")
+}
+
+func TestArgs6(t *testing.T) {
+	arg, err := argparser.ParseArgDefault(cmd6)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if arg == nil {
+		t.Error("arg is nil")
+		return
+	}
+
+	if !arg.CompareCommand("/command6") {
+		t.Error("command is not /command6")
+		return
+	}
+
+	if arg.GetLength() != 6 {
+		t.Error("arg length is not 6")
 		return
 	}
 

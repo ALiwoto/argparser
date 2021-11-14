@@ -24,10 +24,11 @@ type Flag struct {
 }
 
 type EventArgs struct {
-	prefixes []rune
-	command  string // command without '/' or '!'
-	flags    []Flag
-	rawData  string
+	prefixes   []rune
+	command    string // command without '/' or '!'
+	flags      []Flag
+	rawData    string
+	firstValue string
 }
 
 // ParseArg will parse the whole text into an EventArg and will return it.
@@ -83,6 +84,11 @@ func ParseArg(text string, prefixes []rune) (e *EventArgs, err error) {
 		// and should not be used here.
 		lookRaw(&text, e)
 		return e, nil
+	} else {
+		firstValue := tmpOSs[ws.BaseIndex].GetValue()[ws.BaseOneIndex:]
+		firstValue = strings.TrimPrefix(firstValue, e.command)
+		firstValue = strings.TrimSpace(firstValue)
+		e.firstValue = firstValue
 	}
 
 	flagsR := tmpOSs[ws.BaseOneIndex:]

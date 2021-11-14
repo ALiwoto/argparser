@@ -396,7 +396,11 @@ func (e *EventArgs) GetFirstNoneEmptyValue() string {
 	}
 
 	// lets return raw data here; as it is the last resort.
-	return e.rawData
+	if e.rawData != "" {
+		return e.rawData
+	}
+
+	return e.firstValue
 }
 
 // GetAsString will give you the boolean value of the flag
