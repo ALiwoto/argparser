@@ -21,6 +21,7 @@ and raiding." --h = true`
 	cmd6 = `/command6 no longer exists --o --f I like this --action gban --trigger:I hate you --reason = 
 "trolling, spamming, using unsuitable words for the group
 and raiding." --h = true`
+	cmd7 = `/scan@DominatorRobot --f earning money spam`
 )
 
 func TestArgs1(t *testing.T) {
@@ -261,4 +262,37 @@ func TestArgs6(t *testing.T) {
 		"users if they use \""+
 			arg.GetAsString("keyword", "word", "trigger")+
 			"\" in the group.", "the reason will be: \""+reason+"\"")
+}
+
+func TestArgs7(t *testing.T) {
+	arg, err := argparser.ParseArgDefault(cmd7)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if arg == nil {
+		t.Error("arg is nil")
+		return
+	}
+
+	if !arg.CompareCommand("/scan@DominatorRobot") {
+		t.Error("command is not /scan@DominatorRobot")
+		return
+	}
+
+	if arg.HasRawData() {
+		t.Error("arg has raw data")
+		return
+	}
+
+	if !arg.HasFlag("f", "force") {
+		t.Error("flag f is not set")
+		return
+	}
+
+	if arg.GetFirstNoneEmptyValue() != "earning money spam" {
+		t.Error("first none empty value is incorrect")
+		return
+	}
 }

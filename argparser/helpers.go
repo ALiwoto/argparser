@@ -85,7 +85,9 @@ func ParseArg(text string, prefixes []rune) (e *EventArgs, err error) {
 		lookRaw(&text, e)
 		return e, nil
 	} else {
-		firstValue := tmpOSs[ws.BaseIndex].GetValue()[ws.BaseOneIndex:]
+		tmpFirstValue := tmpOSs[ws.BaseIndex]
+		tmpFirstValue.UnlockSpecial()
+		firstValue := tmpFirstValue.GetValue()[ws.BaseOneIndex:]
 		firstValue = strings.TrimPrefix(firstValue, e.command)
 		firstValue = strings.TrimSpace(firstValue)
 		e.firstValue = firstValue
