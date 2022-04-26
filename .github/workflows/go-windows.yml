@@ -1,4 +1,4 @@
-name: Go-linux
+name: Go-windows
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
 
