@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	ws "github.com/ALiwoto/StrongStringGo/strongStringGo"
+	ws "github.com/AnimeKaizoku/ssg/ssg"
 )
 
 //---------------------------------------------------------

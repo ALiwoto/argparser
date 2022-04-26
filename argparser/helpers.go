@@ -9,7 +9,7 @@ import (
 	"errors"
 	"strings"
 
-	ws "github.com/ALiwoto/StrongStringGo/strongStringGo"
+	ws "github.com/AnimeKaizoku/ssg/ssg"
 )
 
 // Flag is the options passed along with the commands
